@@ -1,0 +1,10 @@
+generator client {
+    provider        = "prisma-client-js"
+    previewFeatures = ["postgresqlExtensions"]
+    output          = "../generated/client"
+}
+
+datasource db {
+    provider   = "postgresql"
+    extensions = [vector]
+}

@@ -1,0 +1,51 @@
+model Users {
+    id String @id @default(cuid())
+
+    username      String    @unique
+    email         String    @unique
+    emailVerified DateTime? @map("email_verified")
+
+    firstName String? @map("first_name")
+    lastName  String? @map("last_name")
+
+    avatarUrl String? @map("avatar_url")
+    bio       String?
+
+    role      UserRole @default(USER)
+    aiCredits Int      @default(50) @map("ai_credits")
+    isActive  Boolean  @default(true) @map("is_active")
+
+    createdAt DateTime  @default(now()) @map("created_at")
+    updatedAt DateTime  @updatedAt @map("updated_at")
+    lastLogin DateTime? @map("last_login")
+
+    currentRefreshToken String? @map("current_refresh_token")
+
+    accounts Account[]
+
+    @@map("users")
+}
+
+model Account {
+    id     String @id @default(cuid())
+    userId String @map("user_id")
+
+    type              String
+    provider          String
+    providerAccountId String
+
+    password String?
+
+    refresh_token String? @db.Text
+    access_token  String? @db.Text
+    expires_at    Int?
+    token_type    String?
+    scope         String?
+    id_token      String? @db.Text
+    session_state String?
+
+    user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([provider, providerAccountId])
+    @@map("accounts")
+}

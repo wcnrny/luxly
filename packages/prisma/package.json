@@ -1,0 +1,10 @@
+{
+  "name": "@luxly/prisma",
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.0.0",
+    "@prisma/client": "^7.0.0",
+    "argon2": "^0.44.0",
+    "pg": "^8.16.3",
+    "prisma": "^7.0.0"
+  }
+}

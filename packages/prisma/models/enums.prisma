@@ -1,0 +1,29 @@
+enum UserRole {
+    USER
+    ADMIN
+    MAINTAINER
+}
+
+enum Visibility {
+    PRIVATE
+    PUBLIC
+    LINK_ONLY
+}
+
+enum ContentType {
+    PDF_DOCUMENT
+    YOUTUBE_VIDEO
+    LOCAL_VIDEO
+    WEB_ARTICLE
+    PLAIN_TEXT
+}
+
+enum ProcessingStatus {
+    PENDING
+    QUEUED
+    PROCESSING
+    COMPLETED
+    FAILED
+    UNSUPPORTED
+    CANCELED
+}

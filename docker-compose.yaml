@@ -1,0 +1,104 @@
+name: luxly-dev
+
+services:
+  traefik:
+    image: traefik:v3.0
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.transport.respondingtimeouts.readtimeout=60"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - luxly-net
+
+  postgres:
+    image: ankane/pgvector:latest
+    environment:
+      POSTGRES_USER: luxly
+      POSTGRES_PASSWORD: luxly
+      POSTGRES_DB: luxly_db
+    volumes:
+      - ./docker/data/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - luxly-net
+
+  valkey:
+    image: valkey/valkey:7.2
+    command: valkey-server --save 60 1 --loglevel warning
+    volumes:
+      - ./docker/data/valkey:/data
+    networks:
+      - luxly-net
+
+  bucket:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=${S3_ACCESS_KEY}
+      - MINIO_ROOT_PASSWORD=${S3_SECRET_KEY}
+    volumes:
+      -
+    networks:
+      - luxly-net
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    environment:
+      DATABASE_URL: postgresql://user:password@postgres:5432/luxly_db
+      VALKEY_URL: redis://valkey:6379
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - postgres
+      - valkey
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`api.localhost`)"
+    networks:
+      - luxly-net
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/worker.Dockerfile
+    environment:
+      DATABASE_URL: postgresql://user:password@postgres:5432/luxly_db
+      VALKEY_URL: redis://valkey:6379
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres
+      - valkey
+    networks:
+      - luxly-net
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+    environment:
+      NEXT_PUBLIC_API_URL: http://api.localhost
+    volumes:
+      - .:/app
+      - /app/node_modules
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web.rule=Host(`app.localhost`)"
+    networks:
+      - luxly-net
+
+networks:
+  luxly-net:
+    driver: bridge
