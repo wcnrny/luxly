@@ -1,0 +1,20 @@
+model Document {
+    id    String @id @default(cuid())
+    title String // Dosyanın orijinal adı. (örn: fizik_notlari.pdf)
+
+    s3key    String @map("s3_key")
+    mimeType String @map("mime_type")
+    size     Int
+
+    status ProcessingStatus @default(PENDING)
+
+    userId String @map("user_id")
+    user   Users  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    // TODO: Vector Embedding İlişkisi eklenecek.
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    @@map("documents")
+}

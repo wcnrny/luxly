@@ -21,7 +21,8 @@ model Users {
 
     currentRefreshToken String? @map("current_refresh_token")
 
-    accounts Account[]
+    accounts  Account[]
+    documents Document[]
 
     @@map("users")
 }
