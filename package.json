@@ -14,8 +14,13 @@
     "packages/*"
   ],
   "dependencies": {
+    "@nestjs/bullmq": "^11.0.4",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/jwt": "^11.0.1",
-    "dotenv": "^17.2.3"
+    "api": "^6.1.3",
+    "bullmq": "^5.65.0",
+    "dotenv": "^17.2.3",
+    "zod": "^4.1.13"
   },
   "scripts": {
     "postinstall": "cd packages/prisma && bunx --bun prisma generate",

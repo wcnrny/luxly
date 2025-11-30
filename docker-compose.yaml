@@ -32,21 +32,24 @@ services:
   valkey:
     image: valkey/valkey:7.2
     command: valkey-server --save 60 1 --loglevel warning
+    ports:
+      - "6379:6379q"
     volumes:
       - ./docker/data/valkey:/data
     networks:
       - luxly-net
 
   bucket:
-    image: minio/minio
+    image: minio/minio:latest
     ports:
       - "9000:9000"
       - "9001:9001"
     environment:
       - MINIO_ROOT_USER=${S3_ACCESS_KEY}
       - MINIO_ROOT_PASSWORD=${S3_SECRET_KEY}
+    command: minio server /mnt/minio --console-address ":9001"
     volumes:
-      -
+      - ./docker/data/minio:/mnt/minio
     networks:
       - luxly-net
 
