@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/require-await */
 import {
   ForbiddenException,
   Injectable,
@@ -12,12 +11,14 @@ import argon from 'argon2';
 
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { AppConfigService } from 'src/common/app-config.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly configService: AppConfigService,
   ) {}
   async validateLogin(dto: LoginDto) {
     const user = await this.prismaService.users.findFirst({
@@ -33,11 +34,9 @@ export class AuthService {
     }
     const credentials = user.accounts.find((acc) => acc.provider === 'local');
     if (!credentials || !credentials.password) {
-      console.log(credentials);
       throw new NotFoundException('Kullanıcı bulunamadı!');
     }
-    const pepper =
-      process.env.API_SECRET_PEPPER || 'cok_gizli_secret_pepper_env_e_ekle';
+    const pepper = this.configService.getOrThrow<string>('API_SECRET_PEPPER');
     const isValid = await argon.verify(
       credentials.password,
       dto.password + pepper,
@@ -104,11 +103,11 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         expiresIn: '15m',
-        secret: process.env.API_ACCESS_SECRET_JWT || 'access_secret_ekle',
+        secret: this.configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
       }),
       this.jwtService.signAsync(payload, {
         expiresIn: '7d',
-        secret: process.env.API_REFRESH_SECRET_JWT || 'refresh_secret_ekle',
+        secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
       }),
     ]);
 
@@ -116,8 +115,7 @@ export class AuthService {
   }
 
   async createMockUser() {
-    const pepper =
-      process.env.API_SECRET_PEPPER || 'cok_gizli_secret_pepper_env_e_ekle';
+    const pepper = this.configService.getOrThrow<string>('API_SECRET_PEPPER');
 
     const hashedPassword = await argon.hash('123' + pepper);
 

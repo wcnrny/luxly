@@ -1,4 +1,14 @@
-import { Body, Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { type Request, type Response } from 'express';
 
 import { AuthService } from './auth.service';
@@ -7,27 +17,38 @@ import { LoginDto } from './dto/login.dto';
 
 import { AuthGuard } from './guards/auth.guard';
 import { UserRole } from '@luxly/prisma';
+import { AppConfigService } from 'src/common/app-config.service';
+
+const EXPIRES_IN = 15 * 60;
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: AppConfigService,
+  ) {}
 
   @Post('login')
   async handleLogin(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    console.log(dto);
     const { accessToken, refreshToken, user } =
       await this.authService.validateLogin(dto);
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: this.configService.get<string>('NODE_ENV') === 'production',
       sameSite: 'strict',
       path: '/auth',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    return { user, accessToken };
+    const { currentRefreshToken, ...resUser } = user;
+
+    return {
+      ...resUser,
+      accessToken,
+      expiresIn: EXPIRES_IN * 1000, // ms cinsinden
+    };
   }
 
   @UseGuards(AuthGuard)
@@ -43,12 +64,25 @@ export class AuthController {
       );
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: this.configService.get<string>('NODE_ENV') === 'production',
       sameSite: 'strict',
       path: '/auth',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    return { user, accessToken };
+    const { currentRefreshToken, ...resUser } = user;
+
+    return { ...resUser, accessToken };
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('ping')
+  handlePing(@Req() req: Request) {
+    const reqUser = req.user as { sub: string; email: string; role: UserRole };
+    if (!reqUser) throw new UnauthorizedException('NO_USER');
+    return {
+      message: 'Pong!',
+      user: reqUser,
+    };
   }
 
   @Post('create-user')

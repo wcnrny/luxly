@@ -1,24 +1,24 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
 import { Injectable } from '@nestjs/common';
+import { AppConfigService } from 'src/common/app-config.service';
 
 @Injectable()
 export class RefreshTokenStrategy extends PassportStrategy(
   Strategy,
   'jwt-refresh',
 ) {
-  constructor() {
+  constructor(configService: AppConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
           return request?.cookies?.refresh_token as string;
         },
       ]),
-      secretOrKey: process.env.API_REFRESH_SECRET_JWT || 'idk',
+      secretOrKey: configService.getOrThrow('JWT_REFRESH_SECRET'),
       passReqToCallback: true,
     });
   }
