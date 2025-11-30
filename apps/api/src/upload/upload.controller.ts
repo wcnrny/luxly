@@ -1,7 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   Controller,
   PayloadTooLargeException,
   Post,
+  Req,
+  UnauthorizedException,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -9,6 +13,8 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
+
+import { type Request } from 'express';
 
 const MAX_SIZE = 50 * 1024 * 1024; // 50 MB
 
@@ -35,11 +41,17 @@ export class UploadController {
       },
     }),
   )
-  async HandleUpload(@UploadedFile() file: Express.Multer.File) {
+  async HandleUpload(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request,
+  ) {
     // Redundant runtime check (Multer already enforces), but kept for explicit API error response.
     if (file.size > MAX_SIZE) {
       throw new PayloadTooLargeException('File size is bigger than 50 MB.');
     }
-    await this.uploadService.uploadFile(file, '123');
+    if (!req.user) {
+      throw new UnauthorizedException('Kullanıcı bulunamadı.');
+    }
+    await this.uploadService.uploadFile(file, (req.user as any).sub);
   }
 }
