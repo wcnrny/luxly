@@ -1,253 +1,147 @@
-# Luxly — Intelligent Study Assistant Platform
+# Luxly
 
-Luxly, öğrencilerin video, PDF, metin veya web bağlantıları üzerinden ders içeriklerini yükleyip analiz edebildiği; özet, quiz, flashcard ve konu haritası oluşturabilen bir yapay zeka destekli çalışma asistanıdır.
+![Luxly Banner](https://via.placeholder.com/1280x640.png?text=Luxly+Architecture+Overview)
 
-Bu repo, modern bir **full-stack monorepo** mimarisi kullanır.
+<div align="center">
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
+[![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED.svg)](https://www.docker.com/)
+[![Status](https://img.shields.io/badge/Status-Active_Development-green.svg)]()
+
+**AI-Powered Real-time Collaborative Study Workspace**
+
+[Features](#-key-features) • [Architecture](#-architecture) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started)
+
+</div>
+
+---
+
+## 📖 About The Project
+
+Luxly is an open-source, self-hostable platform designed to bridge the gap between static study materials and dynamic collaboration. It combines the real-time editing capabilities of modern tools like Google Docs with the power of **Retrieval-Augmented Generation (RAG)**.
+
+Users can upload heavy PDF documents or video lectures, which are processed in the background to generate vector embeddings. These embeddings allow users to "chat" with their study materials while collaborating with peers in a shared, real-time editor environment.
+
+Unlike simple wrapper applications, Luxly is built as a **distributed system** using a microservices-based monorepo architecture, prioritizing scalability, data sovereignty, and performance.
+
+---
+
+## 🏗 Architecture
+
+Luxly operates on a modular architecture designed for high throughput and fault tolerance:
+
+- **Ingestion Engine:** Uploaded files (PDF/Video) are stored in **MinIO (S3)**. A message is sent to a **Redis (Valkey)** queue, where a dedicated **Worker Service** picks up the job, extracts text, and generates vector embeddings using OpenAI, storing them in **PostgreSQL (pgvector)**.
+- **Real-time Collaboration:** Utilizing **WebSockets** and **CRDTs (Y.js)** via a dedicated **Collab Service**, ensuring conflict-free editing even with multiple active users.
+- **Secure Auth:** A custom JWT-based authentication system featuring **Refresh Token Rotation**, **HttpOnly Cookies**, and split identity management for robust security.
 
 ---
 
 ## 🚀 Tech Stack
 
-- **Frontend:** Next.js 15 (App Router, Server Actions)
-- **Backend:** NestJS (modular microservice-like architecture)
-- **AI:** OpenAI API (text + embeddings)
-- **Database:** PostgreSQL + pg_vector
-- **Cache / Queue:** Valkey
-- **ORM:** Prisma
-- **Storage:** S3-compatible (Supabase / R2 / Minio)
-- **Build:** Bun
-- **Package Manager:** Bun Workspaces
+This project uses a modern, high-performance tech stack managed within a **Bun Workspace** monorepo.
+
+### Core & Infrastructure
+
+- **Monorepo:** Bun Workspaces
+- **Containerization:** Docker & Docker Compose
 - **Reverse Proxy:** Traefik
-- **Deployment:** Docker + Dokploy
-- **Workers:** Valkey-based job queue
+- **Language:** TypeScript (Strict)
+
+### Backend Services (NestJS)
+
+- **API Service:** REST endpoints, Auth, File Uploads.
+- **Worker Service:** Background job processing (PDF parsing, Embeddings).
+- **Collab Service:** WebSocket server (Hocuspocus) for real-time sync.
+- **Queue/Cache:** Valkey (High-performance Redis fork) & BullMQ.
+- **Storage:** MinIO (S3 Compatible Object Storage).
+
+### Data & AI
+
+- **Database:** PostgreSQL 16 (with `pgvector` extension).
+- **ORM:** Prisma (Multi-file schema structure).
+- **AI/ML:** LangChain (Text Splitters), OpenAI API.
+
+### Frontend (Next.js 15)
+
+- **Framework:** Next.js (App Router).
+- **Editor:** Tiptap (Headless) + Y.js.
+- **Styling:** Tailwind CSS + shadcn/ui.
+- **State:** React Query + Zustand.
 
 ---
 
-## 🏗️ Monorepo Structure
+## 🗺 Roadmap
 
-```
-luxly/
-│
-├── apps/
-│ ├── web/ # Next.js frontend
-│ ├── api/ # NestJS backend
-│ └── worker/ # Background queue worker
-│
-├── packages/
-│ ├── ui/ # Shared UI components
-│ ├── utils/ # Shared utilities
-│ ├── types/ # Shared TypeScript types
-│ ├── config/ # ESLint, tsconfig, tailwind config
-│ └── prisma/ # Prisma schema + client
-│
-├── docker/
-│ ├── traefik/
-│ ├── api.Dockerfile
-│ ├── web.Dockerfile
-│ └── worker.Dockerfile
-│
-└── docker-compose.yml
-```
+We are currently in the active development phase.
+
+- [x] **Phase 0:** Infrastructure Setup (Docker, Monorepo, Shared Packages)
+- [x] **Phase 1:** Authentication & Identity System (JWT, Rotation)
+- [x] **Phase 2:** Ingestion Engine (Upload -> Queue -> Worker)
+- [ ] **Phase 3:** Real-time Collaboration (WebSocket, CRDTs)
+- [ ] **Phase 4:** Frontend Editor Implementation
+- [ ] **Phase 5:** AI RAG Integration
+
+> For a detailed breakdown of tasks and progress, please refer to the **[TODO.md](./TODO.md)** file.
 
 ---
 
-## 📚 Features
+## 🛠 Getting Started
 
-### **1. AI Content Understanding**
+### Prerequisites
 
-- PDF/video/text extraction
-- Text chunking & embeddings
-- Semantic search
-- Topic detection
-- Study summaries (short / mid / long)
-- Glossary extraction
+- Docker & Docker Compose
+- Bun Runtime (`curl -fsSL https://bun.sh/install | bash`)
 
-### **2. Smart Study Tools**
+### Installation
 
-- Automatic quiz generator
-- Flashcard generator (CSV/Anki)
-- Mindmap generator
-- Difficulty scoring
+1.  **Clone the repository**
 
-### **3. Dashboard**
+    ```bash
+    git clone --depth=1 https://github.com/wcnrny/luxly.git
+    cd luxly
+    ```
 
-- Course folders
-- Material archive
-- Versioned notes
-- Processing history
+2.  **Install dependencies**
 
-### **4. Collaboration (Later Phase)**
+    ```bash
+    bun install
+    ```
 
-- Shareable note packs
-- Public/private pages
-- Team mode (optional)
+3.  **Setup Environment Variables**
+    Copy the example env file and configure your secrets (DB, S3, OpenAI).
 
-### **5. Background Processing**
+    ```bash
+    cp .env.example .env
+    ```
 
-- Media → text extraction
-- Embeddings creation
-- AI generation tasks
+4.  **Start the Infrastructure (Docker)**
 
----
+    ```bash
+    docker-compose up -d
+    ```
 
-## 🧩 Development Roadmap
-
-### **Phase 1 — Base Infrastructure**
-
-- [x] Bun workspace setup
-- [x] Next.js + NestJS app initialization
-- [x] Worker service setup
-- [x]? Shared packages (ui, utils, prisma, types, config)
-- [ ] Traefik reverse proxy config
-- [ ] Dokploy deployment base
-- [x] PostgreSQL + Valkey setup
-- [x] Prisma schema + migrations
-- [ ] Global logging & error handling
+5.  **Run Development Mode**
+    ```bash
+    bun run dev
+    ```
 
 ---
 
-### **Phase 2 — User & Storage**
+## 🤝 Contributing
 
-- [x] Authentication system
-- [x] User profile model
-- [ ] S3 file upload
-- [ ] DB models:
-  - User
-  - Course
-  - Material
-  - ProcessedContent
-  - NotePack
-  - Quiz
-  - Flashcard
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
----
-
-### **Phase 3 — AI Processing Engine**
-
-- [ ] Text extraction modules
-- [ ] Audio transcription (video processing)
-- [ ] Embeddings pipeline
-- [ ] Semantic search engine
-- [ ] Summary generator
-- [ ] Quiz generator
-- [ ] Flashcard generator
-- [ ] Topic clustering
-
----
-
-### **Phase 4 — Frontend UI**
-
-- [ ] Dashboard layout
-- [ ] File upload interface
-- [ ] Course detail pages
-- [ ] Notes display UI
-- [ ] Quiz UI
-- [ ] Flashcards UI
-- [ ] Mindmap renderer
-- [ ] Processing status indicator
-
----
-
-### **Phase 5 — Collaboration**
-
-- [ ] Shareable note packs
-- [ ] Public notes
-- [ ] Comments
-- [ ] Team mode
-
----
-
-### **Phase 6 — Optimization**
-
-- [ ] Valkey caching improvements
-- [ ] pg_vector tuning
-- [ ] CDN integration
-- [ ] OpenTelemetry logging
-
----
-
-## 🧠 AI Flow Diagram
-
-```
-User Upload
-│
-▼
-API (NestJS)
-│
-Extract → Chunk → Embed → Store in DB
-│
-▼
-Worker (Background)
-│
-Generate:
-
--Summaries
-
--Quizzes
-
--Flashcards
-
-Topics
-│
-▼
-Database
-│
-▼
-Frontend displays results
-```
-
----
-
-## ⚙️ Environment Variables
-
-### `apps/web/.env`
-
-```
-NEXTAUTH_URL=
-NEXTAUTH_SECRET=
-NEXT_PUBLIC_API_URL=
-```
-
-### `apps/api/.env`
-
-```
-DATABASE_URL=
-VALKEY_URL=
-OPENAI_API_KEY=
-S3_ENDPOINT=
-S3_BUCKET=
-S3_ACCESS_KEY=
-S3_SECRET_KEY=
-JWT_SECRET=
-```
-
-### `apps/worker/.env`
-
-```
-VALKEY_URL=
-OPENAI_API_KEY=
-DATABASE_URL=
-```
-
----
-
-## 🐳 Docker Compose Example
-
-```
-docker-compose up -d --build
-```
-
-Servisler:
-
-- traefik
-- web
-- api
-- worker
-- postgres
-- valkey
+Please read **[CONTRIBUTING.md](./CONTRIBUTING.md)** for details on our code of conduct and the process for submitting pull requests.
 
 ---
 
 ## 📄 License
 
-MIT License
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+<div align="center">
+  <sub>Built with ❤️ by <a href="https://github.com/wcnrny">wcnrny</a></sub>
+</div>
