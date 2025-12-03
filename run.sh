@@ -1,0 +1,1 @@
+tmux new-session -d "cd apps/api && bun start:dev" \; split-window -h "cd apps/web && bun dev" \; split-window -h "cd apps/worker && bun start:dev"  \; select-layout even-horizontal \; attach-session
