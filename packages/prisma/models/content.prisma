@@ -11,7 +11,11 @@ model Document {
     userId String @map("user_id")
     user   Users  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    // TODO: Vector Embedding İlişkisi eklenecek.
+    extractedTextKey String?
+
+    chunks DocumentChunk[]
+
+    errorMessage String? // Hata oluşursa eğer hata mesajını burada tutuyoruz.
 
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
