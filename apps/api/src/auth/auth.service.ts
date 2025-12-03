@@ -53,7 +53,11 @@ export class AuthService {
         data: { currentRefreshToken: refreshTokenHash },
       });
       const { accounts, ...filteredUser } = user;
-      return { accessToken, refreshToken, user: filteredUser };
+      return {
+        accessToken,
+        refreshToken,
+        user: filteredUser,
+      };
     } else {
       console.log('şifre yanlış girildi veya kullanıcı bulunamadı');
       throw new UnauthorizedException('Kullanıcı şifresi yanlış!');
