@@ -9,7 +9,7 @@ services:
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web.transport.respondingtimeouts.readtimeout=60"
     ports:
-      - "80:80"
+      - "80:80"     
       - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -33,23 +33,23 @@ services:
     image: valkey/valkey:7.2
     command: valkey-server --save 60 1 --loglevel warning
     ports:
-      - "6379:6379q"
+      - "6379:6379"
     volumes:
       - ./docker/data/valkey:/data
     networks:
       - luxly-net
 
-  bucket:
+  minio:
     image: minio/minio:latest
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "9000:9000" # API
+      - "9001:9001" # Console
     environment:
-      - MINIO_ROOT_USER=${S3_ACCESS_KEY}
-      - MINIO_ROOT_PASSWORD=${S3_SECRET_KEY}
-    command: minio server /mnt/minio --console-address ":9001"
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY}
+    command: server /data --console-address ":9001"
     volumes:
-      - ./docker/data/minio:/mnt/minio
+      - ./docker/data/minio:/data
     networks:
       - luxly-net
 
@@ -57,15 +57,21 @@ services:
     build:
       context: .
       dockerfile: docker/api.Dockerfile
+    
+    env_file:
+      - .env 
     environment:
-      DATABASE_URL: postgresql://user:password@postgres:5432/luxly_db
-      VALKEY_URL: redis://valkey:6379
+      - DATABASE_URL=postgresql://luxly:luxly@postgres:5432/luxly_db
+      - VALKEY_HOST=valkey
+      - VALKEY_PORT=6379
+      - S3_ENDPOINT=http://minio:9000
     volumes:
       - .:/app
       - /app/node_modules
     depends_on:
       - postgres
       - valkey
+      - minio
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`api.localhost`)"
@@ -76,14 +82,20 @@ services:
     build:
       context: .
       dockerfile: docker/worker.Dockerfile
+    env_file:
+      - .env
     environment:
-      DATABASE_URL: postgresql://user:password@postgres:5432/luxly_db
-      VALKEY_URL: redis://valkey:6379
+      - DATABASE_URL=postgresql://luxly:luxly@postgres:5432/luxly_db
+      - VALKEY_HOST=valkey
+      - VALKEY_PORT=6379
+      - S3_ENDPOINT=http://minio:9000
     volumes:
       - .:/app
+      - /app/node_modules
     depends_on:
       - postgres
       - valkey
+      - minio
     networks:
       - luxly-net
 
@@ -91,8 +103,11 @@ services:
     build:
       context: .
       dockerfile: docker/web.Dockerfile
+    env_file:
+      - .env
     environment:
-      NEXT_PUBLIC_API_URL: http://api.localhost
+      - NEXT_PUBLIC_API_URL=http://api.localhost
+      - INTERNAL_API_URL=http://api:3000 
     volumes:
       - .:/app
       - /app/node_modules
