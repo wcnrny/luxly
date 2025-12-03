@@ -1,0 +1,16 @@
+model DocumentChunk {
+    id      String @id @default(cuid())
+    content String @db.Text // Parçalanmış metin
+
+    pageNumber Int? @map("page_number")
+    startTime  Int? @map("start_time")
+    endTime    Int? @map("end_time")
+
+    // TODO: Phase 4'te buraya @vector ekleyeceğiz (pgvector)
+
+    documentId String   @map("document_id")
+    document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+    @@index([documentId])
+    @@map("document_chunks")
+}
