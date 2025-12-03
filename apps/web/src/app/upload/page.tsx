@@ -1,17 +1,25 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useSession } from "next-auth/react";
+import { env } from "@/utils/env";
 
 const MAX_SIZE = 50 * 1024 * 1024; // 50MB (backend PayloadTooLargeException threshold)
+const baseUrl = env.NEXT_PUBLIC_API_URL.replace(/\/$/, "") || "";
 
 export default function UploadPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [uploading, setUploading] = useState<boolean>(false);
+  const { data: session } = useSession();
 
   async function onSubmit(ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     ev.preventDefault();
+    if (!session) {
+      setError("oc");
+      return;
+    }
     setError("");
     setStatus("");
 
@@ -34,15 +42,18 @@ export default function UploadPage() {
     const formData = new FormData();
     formData.append("file", file, file.name);
 
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || "";
     const endpoint = `${baseUrl}/upload/`;
 
     try {
       setUploading(true);
       setStatus("Yükleniyor...");
+      console.log({ accessToken: session.accessToken });
       const res = await fetch(endpoint, {
         method: "POST",
         body: formData,
+        headers: {
+          Authorization: `Bearer ${session.accessToken}`,
+        },
       });
 
       const isJson = res.headers
