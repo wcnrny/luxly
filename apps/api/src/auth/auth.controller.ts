@@ -39,7 +39,7 @@ export class AuthController {
       httpOnly: true,
       secure: this.configService.get<string>('NODE_ENV') === 'production',
       sameSite: 'strict',
-      path: '/auth',
+      path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     const { currentRefreshToken, ...resUser } = user;
@@ -66,7 +66,7 @@ export class AuthController {
       httpOnly: true,
       secure: this.configService.get<string>('NODE_ENV') === 'production',
       sameSite: 'strict',
-      path: '/auth',
+      path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     const { currentRefreshToken, ...resUser } = user;
@@ -87,6 +87,8 @@ export class AuthController {
 
   @Post('create-user')
   async createUser() {
-    return await this.authService.createMockUser();
+    return this.configService.get<string>('NODE_ENV') === 'production'
+      ? new UnauthorizedException()
+      : await this.authService.createMockUser();
   }
 }

@@ -10,7 +10,7 @@ import { Queue } from 'bullmq';
 import { randomUUID } from 'node:crypto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
-import { QUEUE_NAME } from '@luxly/types';
+import { JobName, ProcessFilePayload, QUEUE_NAME } from '@luxly/types';
 
 function isMulterFile(file: unknown): file is Express.Multer.File {
   return !!file && typeof file === 'object' && 'originalname' in file;
@@ -22,7 +22,7 @@ export class UploadService {
   constructor(
     private readonly prismaService: PrismaService,
     @Inject(S3_CLIENT_TOKEN) private readonly s3Client: S3Client,
-    @InjectQueue('processing-queue') private readonly queueService: Queue,
+    @InjectQueue(QUEUE_NAME) private readonly queueService: Queue,
   ) {}
 
   async uploadFile(file: Express.Multer.File, userId: string) {
@@ -37,6 +37,7 @@ export class UploadService {
         Key: fileKey,
         Body: file.buffer,
         ContentType: file.mimetype,
+        ContentEncoding: 'utf-16',
       }),
     );
     const output_prisma = await this.prismaService.document.create({
@@ -52,6 +53,7 @@ export class UploadService {
       output_prisma.id,
       fileKey,
       file.mimetype,
+      userId,
     );
     this.logger.log({
       id: output_prisma.id,
@@ -60,10 +62,15 @@ export class UploadService {
     });
   }
 
-  async addQueue(docId: string, fileKey: string, mimeType: string) {
+  async addQueue(
+    docId: string,
+    fileKey: string,
+    mimeType: string,
+    userId: string,
+  ) {
     const job = await this.queueService.add(
-      QUEUE_NAME,
-      { docId, fileKey, mimeType },
+      JobName.PROCESS_FILE,
+      { documentId: docId, fileKey, mimeType, userId } as ProcessFilePayload,
       { attempts: 3, backoff: 5000, priority: 1, removeOnComplete: true },
     );
     return job;
