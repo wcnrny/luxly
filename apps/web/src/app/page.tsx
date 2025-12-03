@@ -1,8 +1,7 @@
-import { auth, signIn } from "@/auth";
+import { auth, signIn, signOut } from "@/auth";
 
 export default async function Home() {
   const session = await auth();
-  console.log(session?.user);
   if (!session) {
     return (
       <form
@@ -11,6 +10,7 @@ export default async function Home() {
           try {
             await signIn("credentials", formData);
           } catch (error) {
+            debugger;
             console.log(error);
             return;
           }
@@ -30,7 +30,15 @@ export default async function Home() {
   }
   return (
     <>
-      <pre>{session.user?.id}</pre>
+      <pre>{session.user.name}</pre>
+      <form
+        action={async () => {
+          "use server";
+          await signOut();
+        }}
+      >
+        <button>Sign Out</button>
+      </form>
     </>
   );
 }
