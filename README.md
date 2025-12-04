@@ -77,7 +77,7 @@ We are currently in the active development phase.
 
 - [x] **Phase 0:** Infrastructure Setup (Docker, Monorepo, Shared Packages)
 - [x] **Phase 1:** Authentication & Identity System (JWT, Rotation)
-- [ ] **Phase 2:** Ingestion Engine (Upload -> Queue -> Worker)
+- [x] **Phase 2:** Ingestion Engine (Upload -> Queue -> Worker)
 - [ ] **Phase 3:** Real-time Collaboration (WebSocket, CRDTs)
 - [ ] **Phase 4:** Frontend Editor Implementation
 - [ ] **Phase 5:** AI RAG Integration
