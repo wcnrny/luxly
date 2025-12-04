@@ -28,8 +28,8 @@ _Handling heavy files asynchronously._
 
 - [x] **API Upload:** Multer & S3 integration.
 - [x] **Worker Service:** Setup independent consumer app.
-- [ ] **PDF Processing:** Parse PDF -> Extract Text -> Store in DB.
-- [ ] **Job Queue:** Retry logic and error handling with BullMQ.
+- [x] **PDF Processing:** Parse PDF -> Extract Text -> Store in DB.
+- [x] **Job Queue:** Retry logic and error handling with BullMQ.
 
 ## 🤝 Phase 3: Real-time Collaboration
 
