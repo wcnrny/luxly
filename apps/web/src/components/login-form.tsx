@@ -60,7 +60,7 @@ export function LoginForm() {
               duration: 3000,
             });
             setTimeout(() => {
-              router.push("/dashboard");
+              router.push("/workspaces");
             }, 3000);
           }
         });

@@ -15,11 +15,11 @@ import { AuthService } from './auth.service';
 
 import { LoginDto } from './dto/login.dto';
 
-import { AuthGuard } from './guards/auth.guard';
+import { AuthGuard } from '../common/guards/auth.guard';
 import { UserRole } from '@luxly/prisma';
 import { AppConfigService } from 'src/common/app-config.service';
 
-const EXPIRES_IN = 15 * 60;
+const EXPIRES_IN = 60 * 60 * 24; // 1 Day
 
 @Controller('auth')
 export class AuthController {
@@ -47,7 +47,7 @@ export class AuthController {
     return {
       ...resUser,
       accessToken,
-      expiresIn: EXPIRES_IN * 1000, // ms cinsinden
+      expiresIn: EXPIRES_IN * 1000, // in ms
     };
   }
 
@@ -83,12 +83,5 @@ export class AuthController {
       message: 'Pong!',
       user: reqUser,
     };
-  }
-
-  @Post('create-user')
-  async createUser() {
-    return this.configService.get<string>('NODE_ENV') === 'production'
-      ? new UnauthorizedException()
-      : await this.authService.createMockUser();
   }
 }

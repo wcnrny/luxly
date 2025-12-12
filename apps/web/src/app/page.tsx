@@ -1,4 +1,5 @@
-import { auth, signIn, signOut } from "@/auth";
+import { auth, signIn } from "@/auth";
+import { CollaborativeEditor } from "@/components/CollaborativeEditor";
 
 export default async function Home() {
   const session = await auth();
@@ -10,7 +11,6 @@ export default async function Home() {
           try {
             await signIn("credentials", formData);
           } catch (error) {
-            debugger;
             console.log(error);
             return;
           }
@@ -30,15 +30,7 @@ export default async function Home() {
   }
   return (
     <>
-      <pre>{session.user.name}</pre>
-      <form
-        action={async () => {
-          "use server";
-          await signOut();
-        }}
-      >
-        <button>Sign Out</button>
-      </form>
+      <CollaborativeEditor documentId="cmir1fqvy0001nijvjvzxarx3" />
     </>
   );
 }

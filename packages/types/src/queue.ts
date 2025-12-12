@@ -27,6 +27,8 @@ export const SUPPORTED_MIME_TYPES = {
   ],
   DOCUMENT: [
     // PDF isn't included in here because we have another processor for that.
+    // 11 December 2025 Update: PDF is added here in order to have type definitions for pdf.
+    "application/pdf",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "application/msword",
   ],
