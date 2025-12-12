@@ -58,7 +58,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             (user as CustomUser).lastName,
           refreshToken: (user as CustomUser).refreshToken,
           expiresAt:
-            Date.now() + ((user as CustomUser).expiresIn ?? 15 * 60 * 1000),
+            Date.now() +
+            ((user as CustomUser).expiresIn ?? 24 * 60 * 60 * 1000),
         };
       }
       if (Date.now() < (token as any).expiresAt - 10000) {
@@ -70,6 +71,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (token) {
         session.accessToken = token.accessToken as string;
         session.user.role = token.role as string;
+        session.user.id = token.sub as string;
       }
       if (token.error) {
         (session as any).error = token.error;

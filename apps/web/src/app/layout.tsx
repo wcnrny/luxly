@@ -5,6 +5,8 @@ import { SessionProvider } from "next-auth/react";
 import AuthWatcher from "@/components/providers/auth-watcher";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { CustomQueryClientProvider } from "@/components/providers/query-client";
+import { ModalProvider } from "@/components/providers/modal-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -39,7 +41,8 @@ export default function RootLayout({
         >
           <SessionProvider refetchOnWindowFocus={false}>
             <AuthWatcher />
-            {children}
+            <CustomQueryClientProvider>{children}</CustomQueryClientProvider>
+            <ModalProvider />
             <Toaster />
           </SessionProvider>
         </ThemeProvider>

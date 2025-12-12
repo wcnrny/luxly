@@ -1,5 +1,6 @@
 import { JWT } from "@auth/core/jwt";
 import { API_URL } from "./api";
+import { redirect } from "next/navigation";
 export async function refreshAccessToken(token: JWT) {
   try {
     const response = await fetch(`${API_URL}/auth/refresh`, {
@@ -29,6 +30,7 @@ export async function refreshAccessToken(token: JWT) {
     };
   } catch (error) {
     console.error("Token yenileme hatası:", error);
+    redirect("/login");
     return {
       ...token,
       error: "RefreshAccessTokenError",
