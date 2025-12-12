@@ -1,0 +1,8 @@
+model DocumentState {
+    id         String   @id @default(cuid())
+    documentId String   @unique
+    data       Bytes // Y.js data bytes
+    updatedAt  DateTime @updatedAt
+
+    document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
