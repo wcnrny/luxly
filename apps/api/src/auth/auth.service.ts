@@ -59,8 +59,9 @@ export class AuthService {
         user: filteredUser,
       };
     } else {
-      console.log('şifre yanlış girildi veya kullanıcı bulunamadı');
-      throw new UnauthorizedException('Kullanıcı şifresi yanlış!');
+      throw new UnauthorizedException(
+        'You have entered wrong email or password.',
+      );
     }
   }
 
@@ -70,16 +71,14 @@ export class AuthService {
     });
 
     if (!user || !user.currentRefreshToken) {
-      throw new ForbiddenException('Erişim Reddedildi (User yok veya RT yok)');
+      throw new ForbiddenException('No user or refresh token.');
     }
     const refreshTokenMatches = await argon.verify(
       user.currentRefreshToken,
       incomingRefreshToken,
     );
     if (!refreshTokenMatches) {
-      throw new ForbiddenException(
-        'Erişim Reddedildi (Geçersiz Refresh Token)',
-      );
+      throw new ForbiddenException('Non-valid refresh token.');
     }
 
     const tokens = await this.generateTokens(user.id, user.email, user.role);
@@ -106,7 +105,7 @@ export class AuthService {
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        expiresIn: '15m',
+        expiresIn: '1d',
         secret: this.configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
       }),
       this.jwtService.signAsync(payload, {
@@ -116,36 +115,5 @@ export class AuthService {
     ]);
 
     return { accessToken, refreshToken };
-  }
-
-  async createMockUser() {
-    const pepper = this.configService.getOrThrow<string>('API_SECRET_PEPPER');
-
-    const hashedPassword = await argon.hash('123' + pepper);
-
-    const seedUser = await this.prismaService.users.upsert({
-      where: { email: 'wcnrny@proton.me' },
-      update: {},
-      create: {
-        email: 'wcnrny@proton.me',
-        username: 'wcnrny',
-        firstName: 'Furkan',
-        lastName: 'Erkara',
-        role: 'ADMIN',
-        bio: 'deneme',
-        emailVerified: new Date(),
-        accounts: {
-          create: {
-            provider: 'local',
-            type: 'credentials',
-            providerAccountId: 'wcnrny@proton.me',
-            password: hashedPassword,
-          },
-        },
-      },
-    });
-
-    console.log(`[+] Kullanıcı hazır: ${seedUser.id}`);
-    return true;
   }
 }
