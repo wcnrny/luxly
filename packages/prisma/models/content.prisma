@@ -9,11 +9,15 @@ model Document {
     status ProcessingStatus @default(PENDING)
 
     userId String @map("user_id")
-    user   Users  @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user   Users  @relation(fields: [userId], references: [id])
+
+    workspaceId String?    @map("workspace_id")
+    workspace   Workspace? @relation(fields: [workspaceId], references: [id])
 
     extractedTextKey String?
 
-    chunks DocumentChunk[]
+    chunks        DocumentChunk[]
+    documentState DocumentState?
 
     errorMessage String? // Hata oluşursa eğer hata mesajını burada tutuyoruz.
 

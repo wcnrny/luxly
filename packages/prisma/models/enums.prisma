@@ -4,6 +4,13 @@ enum UserRole {
     MAINTAINER
 }
 
+enum WorkspaceRole {
+    OWNER
+    ADMIN
+    MEMBER
+    VIEWER
+}
+
 enum Visibility {
     PRIVATE
     PUBLIC
