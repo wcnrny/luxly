@@ -25,15 +25,15 @@ _Building the foundation._
 
 _Moving from "Personal App" to "SaaS Platform"._
 
-- [ ] **Database Schema:**
-  - [ ] Add `Workspace` model (Many-to-Many with Users).
-  - [ ] Migrate `Document` model to belong to `Workspace`.
-- [ ] **API Refactoring:**
-  - [ ] Implement `WorkspaceGuard` for permission checks.
-  - [ ] Refactor `/dashboard` routes to `/workspaces`.
-  - [ ] Refactor upload endpoint to `POST /workspaces/:id/documents`.
+- [x] **Database Schema:**
+  - [x] Add `Workspace` model (Many-to-Many with Users).
+  - [x] Migrate `Document` model to belong to `Workspace`.
+- [x] **API Refactoring:**
+  - [x] Implement `WorkspaceGuard` for permission checks.
+  - [x] Refactor `/dashboard` routes to `/workspaces`.
+  - [x] Refactor upload endpoint to `POST /workspaces/:id/documents`.
 - [ ] **Frontend Routing:**
-  - [ ] Create Workspace Switcher UI.
+  - [x] Create Workspace Switcher UI.
   - [ ] Implement Dynamic Routing (`/workspaces/[id]/...`).
 
 ## 🏭 Phase 2: Ingestion Engine & Processing

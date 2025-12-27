@@ -33,4 +33,5 @@ export const SUPPORTED_MIME_TYPES = {
     "application/msword",
   ],
   TEXT: ["text/plain", "text/markdown", "text/csv"],
+  IMAGES: ["image/png", "image/jpeg", "image/jpg", "image/webp"],
 };

@@ -3,6 +3,78 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@layer components {
+  .tiptap {
+    p {
+      @apply my-4 first:mt-0 last:mb-0 text-base leading-relaxed;
+    }
+
+    h1 {
+      @apply text-3xl font-bold mt-8 mb-4 first:mt-0 last:mb-0;
+    }
+  }
+  /* Collaborative Cursors */
+  .collaboration-cursor__caret {
+    border-left: 1px solid #0d0d0d;
+    border-right: 1px solid #0d0d0d;
+    margin-left: -1px;
+    margin-right: -1px;
+    pointer-events: none;
+    position: relative;
+    word-break: normal;
+  }
+
+  /* İmlecin üzerindeki isim etiketi */
+  .collaboration-cursor__label {
+    border-radius: 3px 3px 3px 0;
+    color: #0d0d0d;
+    font-size: 12px;
+    font-weight: 600;
+    left: -1px;
+    line-height: normal;
+    padding: 0.1rem 0.3rem;
+    position: absolute;
+    top: -1.4em;
+    user-select: none;
+    white-space: nowrap;
+    /* Kullanıcı rengi buraya inline style olarak JS tarafından basılır */
+  }
+}
+
+@layer utilities {
+  .container {
+    margin-inline: auto;
+    padding-inline: 2rem;
+  }
+
+  /* Modern Glass Effect */
+  .glass-card {
+    @apply bg-card/60 backdrop-blur-xl border-white/5 shadow-2xl;
+  }
+
+  /* Başlıklar için Gradient Yazı */
+  .text-gradient {
+    background: linear-gradient(to right, oklch(0.985 0 0), oklch(0.8 0 0));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Primary Gradient Buton/Logo için */
+  .primary-gradient {
+    background: linear-gradient(
+      135deg,
+      oklch(0.6 0.22 280),
+      oklch(0.5 0.25 300)
+    );
+  }
+}
+
+* {
+  scroll-behavior: smooth;
+  border-color: var(--border);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -44,72 +116,105 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  /* Genel Ayarlar */
+  --radius: 0.75rem; /* Biraz daha yumuşak köşeler */
+
+  /* --- LIGHT MODE (Temiz & Kurumsal) --- */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
+
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
+
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+
+  /* Primary: Morumsu İndigo (Light mode için biraz koyu) */
+  --primary: oklch(0.55 0.22 280);
   --primary-foreground: oklch(0.985 0 0);
+
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
+
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
+
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
+
   --destructive: oklch(0.577 0.245 27.325);
+
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
+  --ring: oklch(0.55 0.22 280); /* Primary ile uyumlu */
+
+  /* Chart Colors (Uyumlu hale getirildi) */
+  --chart-1: oklch(0.55 0.22 280);
+  --chart-2: oklch(0.65 0.18 300);
+  --chart-3: oklch(0.45 0.15 260);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
+
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary: oklch(0.55 0.22 280);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-ring: oklch(0.55 0.22 280);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  /* --- DARK MODE (Midnight Indigo) --- */
+
+  /* Zemin: Tam siyah değil, çok koyu gece mavisi/zifiri (Hue: 270 civarı) */
+  --background: oklch(0.12 0.02 270);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+
+  /* Card: Zeminden çok az daha açık, derinlik katmak için */
+  --card: oklch(0.14 0.025 270);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
+
+  --popover: oklch(0.14 0.025 270);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
+
+  /* Primary: Patlayan Elektrik Moru (Neon etkisi için Chroma yüksek) */
+  --primary: oklch(0.62 0.22 280);
+  --primary-foreground: oklch(0.985 0 0); /* Üzerindeki yazı beyaz */
+
+  /* Secondary: Butonlar vs için koyu gri-mor */
+  --secondary: oklch(0.22 0.04 270);
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
+
+  --muted: oklch(0.22 0.04 270);
+  --muted-foreground: oklch(0.7 0.02 270);
+
+  --accent: oklch(0.22 0.04 270);
   --accent-foreground: oklch(0.985 0 0);
+
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
+
+  /* Border: Çok silik, hayalet gibi görünen çizgiler */
+  --border: oklch(0.25 0.04 270);
+  --input: oklch(0.25 0.04 270);
+  --ring: oklch(0.62 0.22 280);
+
+  /* Chart Colors (Dark moda uygun neonlar) */
+  --chart-1: oklch(0.62 0.22 280); /* Mor */
+  --chart-2: oklch(0.7 0.15 310); /* Pembe */
+  --chart-3: oklch(0.6 0.15 240); /* Mavi */
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
+
+  --sidebar: oklch(0.12 0.02 270); /* Main background ile aynı */
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary: oklch(0.62 0.22 280);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent: oklch(0.22 0.04 270);
   --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-border: oklch(0.25 0.04 270);
+  --sidebar-ring: oklch(0.62 0.22 280);
 }
 
 @layer base {

@@ -1,0 +1,83 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "DEV: Web",
+      "type": "shell",
+      "command": "bun dev",
+      "options": {
+        "cwd": "${workspaceFolder}/apps/web"
+      },
+      "isBackground": true,
+      "problemMatcher": ["$tsc-watch"],
+      "presentation": {
+        "group": "luxly-dev",
+        "reveal": "always",
+        "panel": "new",
+        "focus": false
+      }
+    },
+    {
+      "label": "DEV: Worker",
+      "type": "shell",
+      "command": "bun start:dev",
+      "options": {
+        "cwd": "${workspaceFolder}/apps/worker"
+      },
+      "isBackground": true,
+      "problemMatcher": ["$tsc-watch"],
+      "presentation": {
+        "group": "luxly-dev",
+        "reveal": "always",
+        "panel": "new",
+        "focus": false
+      }
+    },
+    {
+      "label": "DEV: Collab Server",
+      "type": "shell",
+      "command": "bun start:dev", // Veya sunucunu başlatan komut
+      "options": {
+        "cwd": "${workspaceFolder}/apps/collab"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "group": "luxly-dev",
+        "reveal": "always",
+        "panel": "new",
+        "focus": false
+      }
+    },
+    {
+      "label": "DEV: API",
+      "type": "shell",
+      "command": "bun start:dev",
+      "options": {
+        "cwd": "${workspaceFolder}/apps/api"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "group": "luxly-dev",
+        "reveal": "always",
+        "panel": "new",
+        "focus": false
+      }
+    },
+    {
+      "label": "🚀 START ALL (Luxly)",
+      "dependsOn": [
+        "DEV: Web",
+        "DEV: Worker",
+        "DEV: Collab Server",
+        "DEV: API"
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}

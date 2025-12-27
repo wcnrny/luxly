@@ -11,6 +11,7 @@ services:
     ports:
       - "80:80"     
       - "8080:8080"
+      - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
@@ -19,9 +20,9 @@ services:
   postgres:
     image: ankane/pgvector:latest
     environment:
-      POSTGRES_USER: luxly
-      POSTGRES_PASSWORD: luxly
-      POSTGRES_DB: luxly_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - ./docker/data/postgres:/var/lib/postgresql/data
     ports:
@@ -56,15 +57,11 @@ services:
   api:
     build:
       context: .
-      dockerfile: docker/api.Dockerfile
-    
+      dockerfile: ./docker/api.Dockerfile
     env_file:
       - .env 
     environment:
-      - DATABASE_URL=postgresql://luxly:luxly@postgres:5432/luxly_db
-      - VALKEY_HOST=valkey
-      - VALKEY_PORT=6379
-      - S3_ENDPOINT=http://minio:9000
+      - NODE_ENV=production
     volumes:
       - .:/app
       - /app/node_modules
@@ -74,7 +71,8 @@ services:
       - minio
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=Host(`api.localhost`)"
+      - "traefik.http.routers.api.rule=Host(`${API_HOST}`)"
+      - "traefik.http.services.api.loadbalancer.server.port=3001"
     networks:
       - luxly-net
 
@@ -84,11 +82,6 @@ services:
       dockerfile: docker/worker.Dockerfile
     env_file:
       - .env
-    environment:
-      - DATABASE_URL=postgresql://luxly:luxly@postgres:5432/luxly_db
-      - VALKEY_HOST=valkey
-      - VALKEY_PORT=6379
-      - S3_ENDPOINT=http://minio:9000
     volumes:
       - .:/app
       - /app/node_modules
@@ -103,17 +96,19 @@ services:
     build:
       context: .
       dockerfile: docker/web.Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     env_file:
       - .env
     environment:
-      - NEXT_PUBLIC_API_URL=http://api.localhost
-      - INTERNAL_API_URL=http://api:3000 
-    volumes:
-      - .:/app
-      - /app/node_modules
+      - AUTH_TRUST_HOST=${AUTH_TRUST_HOST}
+      - AUTH_URL=http://${WEB_HOST}
+      - INTERNAL_API_URL=${INTERNAL_API_URL}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.web.rule=Host(`app.localhost`)"
+      - "traefik.http.routers.web.rule=Host(`${WEB_HOST}`)"
+      - "traefik.http.services.web.loadbalancer.server.port=3000"
     networks:
       - luxly-net
 

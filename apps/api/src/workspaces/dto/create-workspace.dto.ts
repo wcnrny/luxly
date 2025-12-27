@@ -1,7 +1,11 @@
-import { IsNotEmpty, Min } from 'class-validator';
+import { IsOptional } from 'class-validator';
 
 export class CreateWorkspaceDto {
-  @IsNotEmpty()
-  @Min(4)
   name: string;
+
+  @IsOptional()
+  description: string;
+
+  @IsOptional()
+  iconURL: string;
 }

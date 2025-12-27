@@ -1,3 +1,0 @@
-model Course {
-    id String @id @default(cuid())
-}

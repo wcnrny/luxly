@@ -16,6 +16,10 @@ import { Readable } from 'stream';
 import { Prisma, ProcessingStatus } from '@luxly/prisma';
 import { ProcessorFactory } from './core/factories/processor.factory';
 
+import { TiptapTransformer } from '@hocuspocus/transformer';
+import * as Y from 'yjs';
+import StarterKit from '@tiptap/starter-kit';
+
 @Processor(QUEUE_NAME)
 export class WorkerService extends WorkerHost {
   private readonly logger = new Logger(WorkerService.name);
@@ -30,6 +34,8 @@ export class WorkerService extends WorkerHost {
   async process(job: Job<ProcessFilePayload, any, string>): Promise<any> {
     const { documentId, fileKey, mimeType } = job.data;
     const localPath = join(tmpdir(), fileKey);
+
+    const fullTextParagraphs: string[] = [];
     try {
       this.logger.log(`Job started: [${job.id}]: ${mimeType}`);
 
@@ -55,6 +61,11 @@ export class WorkerService extends WorkerHost {
           startTime: chunk.metadata.startTime ?? null,
           endTime: chunk.metadata.endTime ?? null,
         });
+
+        if (chunk.content) {
+          fullTextParagraphs.push(chunk.content);
+        }
+
         if (batchBuffer.length >= this.BATCH_SIZE) {
           await this.flushBatch(batchBuffer);
           batchBuffer = [];
@@ -62,6 +73,10 @@ export class WorkerService extends WorkerHost {
       }
       if (batchBuffer.length > 0) {
         await this.flushBatch(batchBuffer);
+      }
+
+      if (fullTextParagraphs.length > 0) {
+        await this.createAndSaveDocumentState(documentId, fullTextParagraphs);
       }
       await this.updateStatus(documentId, 'COMPLETED');
       this.logger.log(`Job Completed! [${job.id}]`);
@@ -74,6 +89,47 @@ export class WorkerService extends WorkerHost {
     }
 
     return {};
+  }
+
+  private async createAndSaveDocumentState(
+    documentId: string,
+    paragraphs: string[],
+  ) {
+    this.logger.log(`Generating Tiptap State for document: ${documentId}`);
+
+    const tiptapJson = {
+      type: 'doc',
+      content: paragraphs.map((text) => ({
+        type: 'paragraph',
+        content: [
+          {
+            type: 'text',
+            text: text,
+          },
+        ],
+      })),
+    };
+    const ydoc = TiptapTransformer.toYdoc(tiptapJson, 'default', [
+      StarterKit as any,
+    ]);
+
+    const update = Y.encodeStateAsUpdate(ydoc);
+    const buffer = Buffer.from(update);
+
+    await this.prismaService.documentState.upsert({
+      where: { documentId },
+      create: {
+        documentId,
+        data: buffer,
+      },
+      update: {
+        data: buffer,
+      },
+    });
+
+    this.logger.log(
+      `DocumentState saved successfully! Size: ${buffer.length} bytes`,
+    );
   }
 
   private async downloadFile(key: string, outputPath: string) {

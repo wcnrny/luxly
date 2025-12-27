@@ -1,5 +1,4 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
   DropdownMenu,
@@ -15,9 +14,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { type Prisma } from "@luxly/prisma";
-import { Session } from "next-auth";
-import { API_URL } from "@/utils/api";
 import {
   HelpCircle,
   Keyboard,
@@ -29,33 +25,21 @@ import {
   Sun,
 } from "lucide-react";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
+import { getFullIconUrl } from "@/utils/helpers";
+import { type Session, type User } from "better-auth";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
-export function Profile({ session }: { session: Session }) {
+export function Profile({ user }: { session: Session; user: User }) {
   const { setTheme } = useTheme();
-  const { data, error } = useQuery<
-    Prisma.UsersGetPayload<{
-      select: { avatarUrl: true; firstName: true; lastName: true };
-    }>
-  >({
-    queryKey: ["user"],
-    queryFn: () =>
-      fetch(`${API_URL}/users/${session.user.id}/profile`, {
-        method: "GET",
-        headers: { Authorization: `Bearer ${session!.accessToken}` },
-      }).then((res) => res.json()),
-  });
-  if (error) {
-    console.error(error);
-  }
-  console.log(data?.avatarUrl);
+  const router = useRouter();
   return (
     <DropdownMenu dir="ltr">
       <DropdownMenuTrigger className="cursor-pointer">
         <Avatar>
           <AvatarImage
-            src={data?.avatarUrl as string}
+            src={getFullIconUrl(user.image as string)}
             alt="user-profile"
             width={24}
             height={24}
@@ -65,9 +49,7 @@ export function Profile({ session }: { session: Session }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuGroup>
-          <DropdownMenuLabel>
-            {data?.firstName} {data?.lastName}
-          </DropdownMenuLabel>
+          <DropdownMenuLabel>{user.name}</DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
@@ -127,8 +109,14 @@ export function Profile({ session }: { session: Session }) {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onClick={() => {
-            signOut({ redirectTo: "/" });
+          onClick={async () => {
+            await authClient.signOut({
+              fetchOptions: {
+                onSuccess: () => {
+                  router.push("/");
+                },
+              },
+            });
           }}
           variant="destructive"
         >

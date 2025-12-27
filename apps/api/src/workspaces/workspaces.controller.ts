@@ -11,6 +11,7 @@ import {
   UploadedFile,
   PayloadTooLargeException,
   UnauthorizedException,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -21,8 +22,9 @@ import { WorkspaceAuthGuard } from 'src/common/guards/workspace-auth.guard';
 
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 
-import { type REQ_USER } from 'types/req-user.type';
 import { type Request } from 'express';
+import { AddMemberDto } from './dto/invite-dto';
+import { WorkspaceRole } from '@luxly/prisma';
 
 const MAX_SIZE = 50 * 1024 * 1024; // 50 MB
 
@@ -32,33 +34,78 @@ export class WorkspacesController {
   constructor(private readonly workspacesService: WorkspacesService) {}
 
   @Post()
-  async create(
+  async handleCreate(
     @Body() createWorkspaceDto: CreateWorkspaceDto,
     @Req() req: Request,
   ) {
-    const user = req.user as REQ_USER;
-    return await this.workspacesService.create(
-      user.sub,
-      createWorkspaceDto.name,
+    const userId = req.user!.id;
+    return await this.workspacesService.create(userId, createWorkspaceDto);
+  }
+
+  @Get('upload/icon')
+  async handleUploadIcon(@Query('contentType') contentType: string) {
+    return await this.workspacesService.uploadIcon(contentType);
+  }
+  @Get()
+  @UseGuards(AuthGuard)
+  async getWorkspace(@Req() req: Request) {
+    const user = req.user!;
+    return await this.workspacesService.findAllMyWorkspaces(user.id);
+  }
+
+  @Get(':id')
+  @UseGuards(WorkspaceAuthGuard)
+  async findOne(@Param('id') id: string, @Req() req: Request) {
+    const userId = req.user!.id;
+    return await this.workspacesService.findOne(id, userId);
+  }
+
+  @Get(':id/members')
+  @UseGuards(WorkspaceAuthGuard)
+  async findMembers(@Param('id') id: string, @Req() req: Request) {
+    const userId = req.user!.id;
+    return await this.workspacesService.findMembers(id, userId);
+  }
+  @Patch(':id/members/:userId')
+  @UseGuards(WorkspaceAuthGuard)
+  async updateMember(
+    @Param('id') id: string,
+    @Req() req: Request,
+    @Param('userId') updateUserId: string,
+    @Body() body: { role: WorkspaceRole },
+  ) {
+    const userId = req.user!.id;
+    return await this.workspacesService.updateMember(
+      id,
+      userId,
+      updateUserId,
+      body.role,
     );
   }
 
-  @Get()
-  async getWorkspace(@Req() req: Request) {
-    const user = req.user as REQ_USER;
-    return await this.workspacesService.findAllMyWorkspaces(user.sub);
-  }
-
   @UseGuards(WorkspaceAuthGuard)
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return await this.workspacesService.findOne(id);
+  @Post('add/:id')
+  async addPeople(@Body() dto: AddMemberDto) {
+    return await this.workspacesService.addPeople(dto.workspaceId, dto.email);
   }
 
   @UseGuards(WorkspaceAuthGuard)
   @Patch(':id')
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   update(@Param('id') id: string, @Body() updateDto: any) {
-    return this.workspacesService.update(id, updateDto);
+    // return this.workspacesService.update(id, updateDto);
+  }
+
+  @UseGuards(WorkspaceAuthGuard)
+  @Get(':id/documents')
+  async handleGetDocuments(@Param('id') workspaceId: string) {
+    return await this.workspacesService.getDocuments(workspaceId);
+  }
+
+  @UseGuards(WorkspaceAuthGuard)
+  @Get(':id/documents/:docId')
+  async handleGetDocument(@Param('docId') documentId: string) {
+    return await this.workspacesService.getDocument(documentId);
   }
 
   @UseGuards(WorkspaceAuthGuard)
@@ -88,12 +135,8 @@ export class WorkspacesController {
       throw new PayloadTooLargeException('File size is bigger than 50 MB.');
     }
     if (!req.user) {
-      throw new UnauthorizedException('Kullanıcı bulunamadı.');
+      throw new UnauthorizedException('User not found.');
     }
-    await this.workspacesService.uploadFile(
-      workspaceId,
-      file,
-      (req.user as REQ_USER).sub,
-    );
+    await this.workspacesService.uploadFile(workspaceId, file, req.user.id);
   }
 }

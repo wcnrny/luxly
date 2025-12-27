@@ -4,13 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils"; // shadcn utility
 import { Profile } from "./profile"; // Senin profil bileşenin
-import { useSession } from "next-auth/react";
+import { authClient } from "@/lib/auth-client";
 import { Search } from "lucide-react"; // İkon
 import { Button } from "./ui/button";
 
 export function Navbar() {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { data: session } = authClient.useSession();
 
   const links = [
     { href: "/workspaces", label: "Workspaces" },
@@ -19,10 +19,10 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto max-w-7xl px-4 md:px-8 h-16 flex items-center justify-between">
+      <div className="container mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Link
-            href="/workspaces"
+            href="/"
             className="font-bold text-xl tracking-tight flex items-center gap-2"
           >
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground">
@@ -66,7 +66,7 @@ export function Navbar() {
           </Button>
 
           {/* User Profile */}
-          {session && <Profile session={session} />}
+          {session && <Profile session={session.session} user={session.user} />}
         </div>
       </div>
     </header>

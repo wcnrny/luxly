@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   Req,
   Res,
   UnauthorizedException,
@@ -18,6 +19,7 @@ import { LoginDto } from './dto/login.dto';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { UserRole } from '@luxly/prisma';
 import { AppConfigService } from 'src/common/app-config.service';
+import { RegisterDto } from './dto/register.dto';
 
 const EXPIRES_IN = 60 * 60 * 24; // 1 Day
 
@@ -51,6 +53,14 @@ export class AuthController {
     };
   }
 
+  @Post('register')
+  async handleRegister(
+    @Body() dto: RegisterDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return await this.authService.registerUser(dto);
+  }
+
   @UseGuards(AuthGuard)
   @Post('refresh')
   async handleRefreshToken(
@@ -72,16 +82,5 @@ export class AuthController {
     const { currentRefreshToken, ...resUser } = user;
 
     return { ...resUser, accessToken };
-  }
-
-  @UseGuards(AuthGuard)
-  @Get('ping')
-  handlePing(@Req() req: Request) {
-    const reqUser = req.user as { sub: string; email: string; role: UserRole };
-    if (!reqUser) throw new UnauthorizedException('NO_USER');
-    return {
-      message: 'Pong!',
-      user: reqUser,
-    };
   }
 }
