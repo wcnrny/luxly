@@ -1,12 +1,11 @@
 model Users {
     id String @id @default(cuid())
 
-    username      String    @unique
-    email         String    @unique
-    emailVerified DateTime? @map("email_verified")
+    username      String   @unique
+    email         String   @unique
+    emailVerified Boolean? @map("email_verified")
 
-    firstName String? @map("first_name")
-    lastName  String? @map("last_name")
+    name String?
 
     avatarUrl String? @map("avatar_url")
     bio       String?
@@ -20,33 +19,60 @@ model Users {
 
     currentRefreshToken String? @map("current_refresh_token")
 
-    accounts          Account[]
     uploadedDocuments Document[]
     memberships       WorkspaceMember[]
+    workspaceInvites  WorkspaceInvite[]
+
+    accounts Account[]
+    sessions Session[]
 
     @@map("users")
 }
 
+model Session {
+    id        String   @id
+    expiresAt DateTime
+    token     String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    ipAddress String?
+    userAgent String?
+    userId    String
+    users     Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([token])
+    @@index([userId])
+    @@map("session")
+}
+
 model Account {
-    id     String @id @default(cuid())
-    userId String @map("user_id")
+    id                    String    @id
+    accountId             String
+    providerId            String
+    userId                String
+    user                  Users     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    accessToken           String?
+    refreshToken          String?
+    idToken               String?
+    accessTokenExpiresAt  DateTime?
+    refreshTokenExpiresAt DateTime?
+    scope                 String?
+    password              String?
+    createdAt             DateTime  @default(now())
+    updatedAt             DateTime  @updatedAt
 
-    type              String
-    provider          String
-    providerAccountId String
+    @@index([userId])
+    @@map("account")
+}
 
-    password String?
+model Verification {
+    id         String   @id
+    identifier String
+    value      String
+    expiresAt  DateTime
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
 
-    refresh_token String? @db.Text
-    access_token  String? @db.Text
-    expires_at    Int?
-    token_type    String?
-    scope         String?
-    id_token      String? @db.Text
-    session_state String?
-
-    user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-    @@unique([provider, providerAccountId])
-    @@map("accounts")
+    @@index([identifier])
+    @@map("Verification")
 }

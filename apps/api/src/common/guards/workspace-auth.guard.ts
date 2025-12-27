@@ -7,15 +7,14 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { REQ_USER } from 'types/req-user.type';
 
 @Injectable()
 export class WorkspaceAuthGuard implements CanActivate {
   constructor(private readonly prismaService: PrismaService) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest() satisfies Request;
-    const user = request.user as REQ_USER;
-    if (!user || !user.sub) {
+    const user = request.user;
+    if (!user || !user.id) {
       return false;
     }
 
@@ -29,7 +28,7 @@ export class WorkspaceAuthGuard implements CanActivate {
     const member = await this.prismaService.workspaceMember.findUnique({
       where: {
         userId_workspaceId: {
-          userId: user.sub,
+          userId: user.id,
           workspaceId: workspaceId,
         },
       },

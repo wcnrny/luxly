@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useSession } from "next-auth/react";
+import { authClient } from "@/lib/auth-client";
 import { env } from "@/utils/env";
 
 const MAX_SIZE = 50 * 1024 * 1024; // 50MB (backend PayloadTooLargeException threshold)
@@ -12,7 +12,7 @@ export default function UploadPage() {
   const [status, setStatus] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [uploading, setUploading] = useState<boolean>(false);
-  const { data: session } = useSession();
+  const { data: session } = authClient.useSession();
 
   async function onSubmit(ev: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     ev.preventDefault();
@@ -47,12 +47,11 @@ export default function UploadPage() {
     try {
       setUploading(true);
       setStatus("Yükleniyor...");
-      console.log({ accessToken: session.accessToken });
       const res = await fetch(endpoint, {
         method: "POST",
         body: formData,
         headers: {
-          Authorization: `Bearer ${session.accessToken}`,
+          Authorization: `Bearer ${session.session.token}`,
         },
       });
 

@@ -1,34 +1,35 @@
 /* eslint-disable react/no-children-prop */
 "use client";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-  FieldError,
-} from "@/components/ui/field";
+
+import * as React from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { signIn } from "next-auth/react";
-import { Button } from "./ui/button";
-import { useRouter } from "next/navigation";
+import { Loader2, Github } from "lucide-react";
 
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+import { authClient } from "@/lib/auth-client";
+
+// Zod Schema (English Messages)
 const formSchema = z.object({
-  email: z.email().min(5),
-  password: z.string().min(3),
+  email: z.email({ message: "Please enter a valid email address." }),
+  password: z
+    .string()
+    .min(3, { message: "Password must be at least 3 characters." }),
 });
 
-export function LoginForm() {
+export function LoginForm({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   const router = useRouter();
+  const [isLoading, setIsLoading] = React.useState(false);
+
   const form = useForm({
     defaultValues: {
       email: "",
@@ -37,128 +38,145 @@ export function LoginForm() {
     validators: {
       onSubmit: formSchema,
     },
-
     onSubmit: async ({ value }) => {
+      setIsLoading(true);
       try {
-        await signIn("credentials", {
+        const res = await authClient.signIn.email({
           ...value,
-          redirect: false,
-        }).then((res) => {
-          if (res?.error) {
-            toast.error("Wrong password or e-mail.", {
-              description:
-                "Check your credentials again... Maybe you missed an exclamation mark in your password?",
-              action: <Button variant={"ghost"}>Okay...</Button>,
-              actionButtonStyle: { alignSelf: "baseline" },
-            });
-            return;
-          }
-          if (res?.ok) {
-            toast.success("🎉 Yippie!!", {
-              description:
-                "You are logged in! We will teleport you to dashboard in 3 seconds!",
-              duration: 3000,
-            });
-            setTimeout(() => {
-              router.push("/workspaces");
-            }, 3000);
-          }
         });
+
+        if (res?.error) {
+          toast.error("Login Failed", {
+            description:
+              "Invalid email or password. Please check your credentials.",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        if (res?.data) {
+          toast.success("Login Successful! 🎉", {
+            description: "Redirecting to dashboard...",
+          });
+          router.push("/workspaces");
+          // Keep loading true while redirecting
+        }
       } catch (error) {
         console.error("Login error:", error);
-        toast.error("An error occured!", {
-          description:
-            "Oh no! There is a problem while we were trying to log you in.",
-          action: <Button variant={"ghost"}>Okay...</Button>,
+        toast.error("Error", {
+          description: "Something went wrong. Please try again.",
         });
+        setIsLoading(false);
       }
     },
   });
-  return (
-    <Card className="w-full sm:max-w-md">
-      <CardHeader>
-        <CardTitle>Log In</CardTitle>
-        <CardDescription>Please log in to continue.</CardDescription>
-      </CardHeader>
 
-      <CardContent>
-        <form
-          id="login-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            form.handleSubmit();
-          }}
-        >
-          <FieldGroup>
-            <form.Field
-              name="email"
-              children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>E-mail</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => {
-                        field.handleChange(e.target.value);
-                      }}
-                      aria-invalid={isInvalid}
-                      placeholder="example@example.com"
-                      autoComplete="on"
-                    />
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
-            />
-            <form.Field
-              name="password"
-              children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => {
-                        field.handleChange(e.target.value);
-                      }}
-                      aria-invalid={isInvalid}
-                      placeholder="******"
-                      autoComplete="on"
-                      min={3}
-                      type="password"
-                    />
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
-            />
-          </FieldGroup>
-        </form>
-      </CardContent>
-      <CardFooter>
-        <Field orientation="horizontal">
-          <Button type="button" variant="outline" onClick={() => form.reset()}>
-            Reset
+  return (
+    <div className={cn("grid gap-6", className)} {...props}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          form.handleSubmit();
+        }}
+      >
+        <div className="grid gap-4">
+          {/* E-MAIL FIELD */}
+          <form.Field
+            name="email"
+            children={(field) => (
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  placeholder="name@example.com"
+                  type="email"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  autoCorrect="off"
+                  disabled={isLoading}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  className={cn(
+                    field.state.meta.errors.length > 0 &&
+                      "border-red-500 focus-visible:ring-red-500"
+                  )}
+                />
+                {field.state.meta.errors ? (
+                  <p className="text-xs text-red-500">
+                    {field.state.meta.errors.join(", ")}
+                  </p>
+                ) : null}
+              </div>
+            )}
+          />
+
+          {/* PASSWORD FIELD */}
+          <form.Field
+            name="password"
+            children={(field) => (
+              <div className="grid gap-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  <a
+                    href="#"
+                    className="text-xs text-muted-foreground hover:text-primary"
+                  >
+                    Forgot your password?
+                  </a>
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="******"
+                  autoComplete="current-password"
+                  disabled={isLoading}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  className={cn(
+                    field.state.meta.errors.length > 0 &&
+                      "border-red-500 focus-visible:ring-red-500"
+                  )}
+                />
+                {field.state.meta.errors ? (
+                  <p className="text-xs text-red-500">
+                    {field.state.meta.errors.join(", ")}
+                  </p>
+                ) : null}
+              </div>
+            )}
+          />
+
+          {/* SUBMIT BUTTON */}
+          <Button disabled={isLoading} className="w-full mt-2">
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Sign In
           </Button>
-          <Button type="submit" form="login-form">
-            Submit
-          </Button>
-        </Field>
-      </CardFooter>
-    </Card>
+        </div>
+      </form>
+
+      {/* Social Login Section */}
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-background px-2 text-muted-foreground">
+            Or continue with
+          </span>
+        </div>
+      </div>
+      <Button
+        variant="outline"
+        type="button"
+        disabled={isLoading}
+        className="w-full gap-2"
+      >
+        <Github className="h-4 w-4" />
+        GitHub
+      </Button>
+    </div>
   );
 }

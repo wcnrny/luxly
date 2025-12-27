@@ -1,12 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { SessionProvider } from "next-auth/react";
-import AuthWatcher from "@/components/providers/auth-watcher";
-import { ThemeProvider } from "@/components/providers/theme-provider";
-import { Toaster } from "@/components/ui/sonner";
-import { CustomQueryClientProvider } from "@/components/providers/query-client";
-import { ModalProvider } from "@/components/providers/modal-provider";
+import { Providers } from "@/components/providers/providers"; // Tek import yeterli
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,19 +28,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <SessionProvider refetchOnWindowFocus={false}>
-            <AuthWatcher />
-            <CustomQueryClientProvider>{children}</CustomQueryClientProvider>
-            <ModalProvider />
-            <Toaster />
-          </SessionProvider>
-        </ThemeProvider>
+        {/* Tüm karmaşa artık bu bileşenin içinde ve güvenli */}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

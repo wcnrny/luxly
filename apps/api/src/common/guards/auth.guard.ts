@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   CanActivate,
@@ -7,36 +7,30 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
-import { AppConfigService } from 'src/common/app-config.service';
+import { fromNodeHeaders } from 'better-auth/node';
+import { getUserFromRequest } from 'src/auth-check';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(
-    private jwtService: JwtService,
-    private readonly configService: AppConfigService,
-  ) {}
+  constructor() {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromHeader(request);
-    if (!token) {
-      throw new UnauthorizedException();
-    }
-    try {
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret: this.configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
-      });
-      request.user = payload;
-    } catch {
-      throw new UnauthorizedException();
-    }
-    return true;
-  }
 
-  private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
+    const headers = fromNodeHeaders(request.headers);
+
+    try {
+      console.log(headers);
+      const result = await getUserFromRequest(headers);
+      if (!result) {
+        throw new UnauthorizedException('UR NOT AUTHORIZED');
+      }
+      request.user = result.user;
+      request['session'] = result.session;
+    } catch (error) {
+      throw new UnauthorizedException(error);
+    }
+
+    return true;
   }
 }

@@ -1,36 +1,19 @@
-import { auth, signIn } from "@/auth";
-import { CollaborativeEditor } from "@/components/CollaborativeEditor";
+import { Navbar } from "@/components/landing/navbar";
+import { HeroSection } from "@/components/landing/hero";
+import { BentoGridSection } from "@/components/landing/bento-grid";
+import { CommunitySection } from "@/components/landing/community";
+import { SiteFooter } from "@/components/landing/footer";
 
-export default async function Home() {
-  const session = await auth();
-  if (!session) {
-    return (
-      <form
-        action={async (formData) => {
-          "use server";
-          try {
-            await signIn("credentials", formData);
-          } catch (error) {
-            console.log(error);
-            return;
-          }
-        }}
-      >
-        <label>
-          Email
-          <input name="email" type="email" />
-        </label>
-        <label>
-          Password
-          <input name="password" type="password" />
-        </label>
-        <button>Sign In</button>
-      </form>
-    );
-  }
+export default function LandingPage() {
   return (
-    <>
-      <CollaborativeEditor documentId="cmir1fqvy0001nijvjvzxarx3" />
-    </>
+    <div className="flex flex-col min-h-screen bg-background text-foreground">
+      <Navbar />
+      <main className="flex-1">
+        <HeroSection />
+        <BentoGridSection />
+        <CommunitySection />
+      </main>
+      <SiteFooter />
+    </div>
   );
 }

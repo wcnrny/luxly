@@ -34,6 +34,9 @@ export const clientConfigSchema = z.object({
   // --- WEB (NEXT.JS) VARIABLES ---
   INTERNAL_API_URL: z.string().optional(),
   NEXT_PUBLIC_API_URL: z.string().nonempty(),
+  NEXT_PUBLIC_BETTER_AUTH_URL: z.string().nonempty(),
+  NEXT_S3_ENDPOINT: z.url().optional(),
+  NEXT_S3_BUCKET_NAME: z.string().min(1).optional(),
 });
 
 export const appConfigSchema = clientConfigSchema.extend(

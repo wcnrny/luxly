@@ -46,7 +46,10 @@ import { WorkspacesModule } from './workspaces/workspaces.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         connection: {
-          host: configService.get<string>('VALKEY_HOST'),
+          host:
+            configService.get<string>('NODE_ENV') === 'production'
+              ? configService.get<string>('INTERNAL_VALKEY_HOST')
+              : configService.get<string>('VALKEY_HOST'),
           port: configService.get<number>('VALKEY_PORT'),
         },
       }),

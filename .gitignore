@@ -36,3 +36,17 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # Docker Data Files (postgres, minio, valkey etc.)
 docker/data
 docker/data/postgres
+
+# Certificate Files (For local traefik)
+packages/certs/*.crt
+packages/certs/*.key
+packages/certs/*.csr
+packages/certs/*.ext
+
+# My personal notes
+PERSONAL-NOTES.md
+
+# Local traefik settings
+traefik.yml
+traefik-dynamic.yml
+"*.local"
