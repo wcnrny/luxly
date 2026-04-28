@@ -7,13 +7,28 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED.svg)](https://www.docker.com/)
-[![Status](https://img.shields.io/badge/Status-Active_Development-green.svg)]()
+[![Status](https://img.shields.io/badge/Status-Archived-red.svg)]()
 
 **AI-Powered Real-time Collaborative Study Workspace**
 
-[Features](#-key-features) • [Architecture](#-architecture) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started)
+[Features](#-key-features) • [Architecture](#-architecture) • [Tech Stack](#-tech-stack) • [Roadmap](#-roadmap)
 
 </div>
+
+---
+
+> [!IMPORTANT]
+> **Project Status: Archived / Experimental Only**
+>
+> This project was a deep dive into distributed systems, real-time collaboration, and RAG architectures during my journey as an Electrical and Electronics Engineering student. While the backend infrastructure and core collaboration logic are functional, I have officially shifted my focus to **Embedded Systems**.
+>
+> Luxly will no longer receive updates or maintenance. You are free to fork this repository, explore the architecture, or repurpose the code for your own learning.
+>
+> 🚀 **What I'm working on now:**
+> - [My Embedded Projects](https://wcnrny.tr/projects)
+> - [ESP32 TWAI/CAN Bus Driver](https://github.com/wcnrny/esp32-twai-can-bus-test)
+> - [INA219 Power Monitor Library](https://github.com/wcnrny/ina219_Library)
+
 
 ---
 
@@ -78,9 +93,9 @@ We are currently in the active development phase.
 - [x] **Phase 0:** Infrastructure Setup (Docker, Monorepo, Shared Packages)
 - [x] **Phase 1:** Authentication & Identity System (JWT, Rotation)
 - [x] **Phase 2:** Ingestion Engine (Upload -> Queue -> Worker)
-- [ ] **Phase 3:** Real-time Collaboration (WebSocket, CRDTs)
+- [x] **Phase 3:** Real-time Collaboration (WebSocket, CRDTs - Collab Service)
 - [ ] **Phase 4:** Frontend Editor Implementation
-- [ ] **Phase 5:** AI RAG Integration
+- [ ] **Phase 5:** AI RAG Integration (Conceptual implementation in Worker)
 
 > For a detailed breakdown of tasks and progress, please refer to the **[TODO.md](./TODO.md)** file.
 

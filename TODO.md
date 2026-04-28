@@ -1,15 +1,22 @@
 # 🗺️ Luxly Roadmap & To-Do
 
-Welcome to the development roadmap for Luxly! This document tracks our progress and future plans.
-We follow a **"Phase-based"** development approach.
+> [!CAUTION]
+> **ARCHIVED PROJECT**
+> This roadmap is no longer being tracked. The project has been archived as the focus has shifted to Embedded Systems.
+> For current projects, visit [wcnrny.tr/projects](https://wcnrny.tr/projects).
 
-### Legend
+### Status Summary (at Archive)
 
-- [x] ✅ Completed
-- [ ] 🚧 Work in Progress
-- [ ] 📅 Planned
+- Core Infrastructure: **Completed**
+- Auth & Identity: **Completed**
+- Multi-tenancy Architecture: **Mostly Completed**
+- Background Ingestion: **Completed**
+- Real-time Backend: **Completed**
+- Frontend Editor: **Incomplete**
+- AI/RAG Logic: **Conceptual/Backend-only**
 
 ---
+
 
 ## 🚀 Phase 1: Core Infrastructure & Auth (Done)
 
