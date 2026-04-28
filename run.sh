@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 SESSION="luxly-dev"
 
@@ -23,11 +23,10 @@ tmux split-window -h "cd apps/api && bun start:dev || echo 'API BAŞLATILAMADI';
 tmux select-pane -t 0
 tmux split-window -v "cd apps/worker && bun start:dev || echo 'WORKER BAŞLATILAMADI'; exec $SHELL"
 
-# 4. PANE (Sağ Alt): COLLAB
-# Sağ panele (Pane 2 oldu kaydığı için) odaklan ve altını böl
-# Not: Collab genelde web içinde olabilir, klasörün varlığından emin ol.
 tmux select-pane -t 2
 tmux split-window -v "cd apps/collab && bun start:dev || echo 'COLLAB BAŞLATILAMADI'; exec $SHELL"
+
+
 
 # ==============================================================================
 # GÖRÜNÜM AYARLARI

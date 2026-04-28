@@ -9,9 +9,9 @@ import {
   Rocket,
   HelpCircle,
   Sparkles,
-} from "lucide-react"; // Yeni ikonlar eklendi
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button"; // Button eklendi
+import { Button } from "@/components/ui/button";
 
 import { WorkspaceCard } from "@/components/workspaces/workspace-card";
 import { CreateWorkspaceCard } from "@/components/workspaces/create-workspace-card";
@@ -68,7 +68,7 @@ export default function WorkspacesPage() {
   }, [session, isPending, isRefetching]);
 
   const filteredWorkspaces = workspaces.filter((w) =>
-    w.name.toLowerCase().includes(searchQuery.toLowerCase())
+    w.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   if (isPending || isRefetching || isLoading) {
@@ -126,7 +126,7 @@ export default function WorkspacesPage() {
         </div>
 
         <div className="mt-20 space-y-8">
-          <div className="relative overflow-hidden rounded-[2rem] border border-border bg-gradient-to-br from-card via-muted/50 to-primary/5 p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 group">
+          <div className="relative overflow-hidden rounded-4xl border border-border bg-linear-to-br from-card via-muted/50 to-primary/5 p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 group">
             <div className="absolute -top-24 -right-24 h-64 w-64 bg-primary/20 blur-[100px] opacity-30 group-hover:opacity-50 transition-opacity" />
 
             <div className="space-y-2 relative z-10 text-center md:text-left">

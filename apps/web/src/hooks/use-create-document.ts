@@ -8,11 +8,21 @@ export function useCreateDocument({ onSuccess }: { onSuccess?: () => void }) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ formData }: { formData: FormData }) => {
+    mutationFn: async ({
+      formData,
+      fileType,
+    }: {
+      formData: FormData;
+      fileType?: string;
+    }) => {
+      console.log({ formData });
       const response = await fetchFromApi<Document[]>({
         path: `workspaces/${formData.get("workspaceId")}/documents/upload`,
         method: "POST",
         body: formData,
+        headers: {
+          "Content-Type": fileType ?? "",
+        },
       });
 
       return response;

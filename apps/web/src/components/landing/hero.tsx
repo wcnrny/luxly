@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, PlayCircle, CheckCircle2 } from "lucide-react";
+import { getLatestVersion } from "@/utils/api";
 
-export function HeroSection() {
+export async function HeroSection() {
+  const version = await getLatestVersion();
   return (
     <section className="relative pt-20 pb-32 md:pt-32 md:pb-48 overflow-hidden">
       {/* Background Blob */}
@@ -12,7 +14,7 @@ export function HeroSection() {
         {/* Badge */}
         <div className="inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium bg-muted/50 mb-6 backdrop-blur-sm">
           <span className="flex h-2 w-2 rounded-full bg-primary mr-2"></span>
-          Luxly v0. is Live
+          Luxly {version} is Live
         </div>
 
         {/* Headline */}

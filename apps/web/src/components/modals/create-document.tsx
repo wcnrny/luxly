@@ -74,10 +74,10 @@ export function CreateDocumentModal() {
     if (!data?.workspaceId) return;
 
     const formData = new FormData();
+    // TODO: BURAYI DÜZELT
     formData.append("workspaceId", data?.workspaceId as string);
     formData.append("title", title);
     formData.append("access_token", data?.accessToken as string);
-
     if (activeTab === "upload") {
       if (!selectedFile) return;
       formData.append("file", selectedFile);
@@ -90,7 +90,7 @@ export function CreateDocumentModal() {
       formData.append("file", file);
     }
 
-    uploadDocument({ formData });
+    uploadDocument({ formData, fileType: selectedFile?.type });
   };
 
   const isSubmitDisabled =

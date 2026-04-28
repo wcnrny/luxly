@@ -15,6 +15,22 @@ export const getBucketUrl = () => {
   } else return `${env.NEXT_S3_ENDPOINT}/${env.NEXT_S3_BUCKET_NAME}`;
 };
 
+export async function getLatestVersion() {
+  try {
+    const res = await fetch(
+      "https://api.github.com/repos/wcnrny/luxly/releases",
+      {
+        next: { revalidate: 3600 },
+      },
+    );
+    if (!res.ok) return "v0.1.0-dev";
+    const data = await res.json();
+    return data[0].tag_name || "v0.1.0";
+  } catch (e) {
+    return "v0.1.0-dev";
+  }
+}
+
 export const API_URL = getBaseUrl();
 
 export async function fetchFromApi<T>(options: FetchOptions): Promise<T> {
